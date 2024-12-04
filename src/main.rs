@@ -59,57 +59,43 @@ trait State {
 
 impl State for OuterState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("OuterState {byte}");
-
-        if byte == b'm' {
-            return Box::new(ReadmState);
-        } else if byte == b'd' {
-            return Box::new(ReaddState);
+        match byte {
+            b'm' => Box::new(ReadmState),
+            b'd' => Box::new(ReaddState),
+            _ => self,
         }
-        self
     }
 }
 
 impl State for ReadmState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("ReadmState {byte}");
-
-        if byte == b'u'   {
-            return Box::new(ReadmuState);
-        } else {
-            return Box::new(OuterState);
+        match byte {
+            b'u' => Box::new(ReadmuState),
+            _ => Box::new(OuterState),
         }
     }
 }
 
 impl State for ReadmuState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("ReaduState {byte}");
-
-        if byte == b'l' {
-            return Box::new(ReadmulState);
-        } else {
-            return Box::new(OuterState);
+        match byte {
+            b'l' => Box::new(ReadmulState),
+            _ => Box::new(OuterState),
         }
     }
 }
 
 impl State for ReadmulState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("ReadlState {byte}");
-
-        if byte == b'(' {
-            return Box::new(ReadmulOpenParenthesisState);
-        } else {
-            return Box::new(OuterState);
+        match byte {
+            b'(' => Box::new(ReadmulOpenParenthesisState),
+            _ => Box::new(OuterState),
         }
     }
 }
 
 impl State for ReadmulOpenParenthesisState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("ReadOpenParenthesisState {byte}");
-
         if byte.is_ascii_digit() {
             accumulated_state.multiplicand_string.clear();
             accumulated_state.multiplicand_string.push(char::from_u32(byte as u32).unwrap());
@@ -122,8 +108,6 @@ impl State for ReadmulOpenParenthesisState {
 
 impl State for ReadDigitMultiplicandState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("ReadDigitMultiplicandState {byte}");
-
         if byte.is_ascii_digit() {
             accumulated_state.multiplicand_string.push(char::from_u32(byte as u32).unwrap());
             return self;
@@ -137,8 +121,6 @@ impl State for ReadDigitMultiplicandState {
 
 impl State for ReadCommaState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("ReadCommaState {byte}");
-
         if byte.is_ascii_digit() {
             accumulated_state.multiplier_string.clear();
             accumulated_state.multiplier_string.push(char::from_u32(byte as u32).unwrap());
@@ -151,8 +133,6 @@ impl State for ReadCommaState {
 
 impl State for ReadDigitMultiplierState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("ReadDigitMultiplierState {byte}");
-
         if byte.is_ascii_digit() {
             accumulated_state.multiplier_string.push(char::from_u32(byte as u32).unwrap());
             return self;
@@ -173,89 +153,68 @@ impl State for ReadDigitMultiplierState {
 
 impl State for ReaddState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("ReadmState {byte}");
-
-        if byte == b'o'   {
-            return Box::new(ReaddoState);
-        } else {
-            return Box::new(OuterState);
+        match byte {
+            b'o' => Box::new(ReaddoState),
+            _ => Box::new(OuterState),
         }
     }
 }
 
 impl State for ReaddoState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("ReadmState {byte}");
-
-        if byte == b'(' {
-            return Box::new(ReaddoOpenParenthesisState);
-        } else if byte == b'n'   {
-            return Box::new(ReaddonState);
-        } else {
-            return Box::new(OuterState);
+        match byte {
+            b'(' => Box::new(ReaddoOpenParenthesisState),
+            b'n' => Box::new(ReaddonState),
+            _ => Box::new(OuterState),
         }
     }
 }
 
 impl State for ReaddoOpenParenthesisState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("ReadmState {byte}");
-
-        if byte == b')' {
-            accumulated_state.do_enabled = true;
-            return Box::new(OuterState);
-        } else {
-            return Box::new(OuterState);
+        match byte {
+            b')' => { accumulated_state.do_enabled = true; Box::new(OuterState) },
+            _ => Box::new(OuterState),
         }
     }
 }
 
 impl State for ReaddonState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("ReadmState {byte}");
-
-        if byte == b'\'' {
-            return Box::new(ReaddonApostropheState);
-        } else {
-            return Box::new(OuterState);
+        match byte {
+            b'\'' => Box::new(ReaddonApostropheState),
+            _ => Box::new(OuterState),
         }
     }
 }
 
 impl State for ReaddonApostropheState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("ReadmState {byte}");
-
-        if byte == b't' {
-            return Box::new(ReaddonApostrophetState);
-        } else {
-            return Box::new(OuterState);
+        match byte {
+            b't' => Box::new(ReaddonApostrophetState),
+            _ => Box::new(OuterState),
         }
     }
 }
 
 impl State for ReaddonApostrophetState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("ReadmState {byte}");
-
-        if byte == b'(' {
-            accumulated_state.do_enabled = true;
-            return Box::new(ReaddonApostrophetOpenParenthesisState);
-        } else {
-            return Box::new(OuterState);
+        match byte { 
+            b'(' => {
+                accumulated_state.do_enabled = true;
+                Box::new(ReaddonApostrophetOpenParenthesisState) },
+            _ => Box::new(OuterState),
         }
     }
 }
 
 impl State for ReaddonApostrophetOpenParenthesisState {
     fn consume(self: Box<Self>, accumulated_state: &mut AccumulatedState, byte: u8) -> Box<dyn State> {
-        println!("ReadmState {byte}");
-
-        if byte == b')' {
-            accumulated_state.do_enabled = false;
-            return Box::new(OuterState);
-        } else {
-            return Box::new(OuterState);
+        match byte {
+            b')' => {
+                accumulated_state.do_enabled = false;
+                Box::new(OuterState) },
+            _ => Box::new(OuterState),
         }
     }
 }
